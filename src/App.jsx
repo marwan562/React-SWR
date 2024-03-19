@@ -19,16 +19,18 @@ const App = () => {
   } = useSWR(cacheKey, getTodos, {
     onSuccess: (data) => data.sort((a, b) => b.id - a.id),
   });
+
   const addTodoMutation = async (newTodo) => {
     try {
-      // call API & mutate here
+      await addTodo(newTodo);
+      mutate();
 
       toast.success("Success! Added new item.", {
         duration: 1000,
         icon: "🎉",
       });
     } catch (err) {
-      toast.error("Failed to add the new item.", {
+      toast.error(`Failed to add the new item.`, {
         duration: 1000,
       });
     }
@@ -36,7 +38,8 @@ const App = () => {
 
   const updateTodoMutation = async (updatedTodo) => {
     try {
-      // call API & mutate here
+      await updateTodo(updatedTodo);
+      mutate();
 
       toast.success("Success! Updated item.", {
         duration: 1000,
@@ -49,9 +52,10 @@ const App = () => {
     }
   };
 
-  const deleteTodoMutation = async ({ id }) => {
+  const deleteTodoMutation = async (todo) => {
     try {
-      // call API & mutate here
+      await deleteTodo(todo.id);
+      mutate();
 
       toast.success("Success! Deleted item.", {
         duration: 1000,
@@ -65,7 +69,8 @@ const App = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    addTodoMutation({ userId: 1, title: newTodo, completed: false, id: 9999 });
+    const data = { userId: 1, title: newTodo, completed: false, id: 9999 };
+    addTodoMutation(data);
     setNewTodo("");
   };
 
@@ -81,7 +86,9 @@ const App = () => {
           placeholder="Enter new todo"
         />
       </div>
-      <button className="submit">submit</button>
+      <button disabled={!newTodo} className="submit">
+        Done
+      </button>
     </form>
   );
 
@@ -105,10 +112,7 @@ const App = () => {
             />
             <label htmlFor={todo.id}>{todo.title}</label>
           </div>
-          <button
-            className="trash"
-            onClick={() => deleteTodoMutation({ id: todo.id })}
-          >
+          <button className="trash" onClick={() => deleteTodoMutation(todo)}>
             X
           </button>
         </article>
